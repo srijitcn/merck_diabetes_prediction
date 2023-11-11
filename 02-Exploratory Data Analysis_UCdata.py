@@ -40,7 +40,7 @@
 # MAGIC - **`SkinThickness`**:integer `-- Triceps skin fold thickness in mm`     
 # MAGIC - **`Insulin`**:integer `-- 2-Hour serum insulin in mu U/ml`     
 # MAGIC - **`BMI`**:double `-- Body mass index measured as weight in kg/(height in m)^2`     
-# MAGIC - **`DiabetesPedigreeFunction`**:double `-- A diabetes onset likelihood {associated with subject’s age and their diabetic family history}`     
+# MAGIC - **`DiabetesPedigreeFunction`**:double `-- A diabetes onset likelihood {associated with subject’s age, their diabetic family history, and other factors}`     
 # MAGIC - **`Outcome`**:integer `-- Diabetes diagnosis`     
 # MAGIC
 # MAGIC We will additionally parse out **`State`** information from **`Address`** so we can visualize the distribution of data across the USA.
@@ -200,7 +200,7 @@ display(pima_sdf2.select(*[F.sum((F.col(c)==0).cast('integer')).alias(f'{c}_coun
 
 # COMMAND ----------
 
-display(pima_sdf2)
+display(pima_sdf2.drop(*pii_cols))
 
 # COMMAND ----------
 
@@ -482,15 +482,23 @@ plt.title("Pearson's Correlation Matrix")
 # COMMAND ----------
 
 # MAGIC %md 
-# MAGIC [to-add/update]
-# MAGIC - Steps we did #####         
 # MAGIC
-# MAGIC -- Benefits of SparkDF (large Datasets)   
-# MAGIC -- Ease of using Pandas DF (familiarity)  
-# MAGIC -- [Pandas API on Spark](https://docs.databricks.com/en/pandas/pandas-on-spark.html): fills the gap of pandas's big data scaling challenge by providing pandas equivalent APIs that work on Apache Spark. 
-# MAGIC - Missing Values -- impute decision/strategy  
-# MAGIC - Skewness of data -- do we normalize/log-transform them? 
-# MAGIC - Q: How do we go about tracking these steps? --> MLflow 
+# MAGIC **In this walk through, we demonstrated:** 
+# MAGIC >- How PySpark DataFrame can help us easily clean, process, and visualize data, which can be advantageous when working with large datasets. 
+# MAGIC >- The ease of converting from PySpark DF to Pandas DF (and vice versa) 
+# MAGIC >- Ease of profiling data in both in PySpark and Pandas
+# MAGIC >- Access to familiar Pandas DF plotting/visualization libraries  e.g seaborn, matplolib etc. to help visualize data distributions, interactions, and outliers.   
+# MAGIC  
+# MAGIC >- The benefits of SparkDF (*large datasets, speed*) together with the ease and familiarity of practitioners using Pandas DF can also now be leveraged using the [Pandas API on Spark](https://docs.databricks.com/en/pandas/pandas-on-spark.html), which fills the gap of Pandas's big data scaling capabilities by providing `Pandas  equivalent APIs` that work on `Apache Spark`.    
+# MAGIC
+# MAGIC **In our EDA, we noted the following and their associated handling decision requirements :**      
+# MAGIC >- `Missing values` --  Impute decision/strategy e.g. `Mean, Median, KNN`?   
+# MAGIC >- `Data skewness` -- Scaling/Transformation e.g. do we sacle/normalize/log-transform ? 
+# MAGIC >- `Outliers` -- Include/Exclude basis?   
+# MAGIC
+# MAGIC
+# MAGIC **A residual and important question lingers: How do we go about tracking these decision steps for reproducibility?**    
+# MAGIC --> MLflow 
 
 # COMMAND ----------
 
