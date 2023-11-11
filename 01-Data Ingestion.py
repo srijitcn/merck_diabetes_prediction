@@ -70,13 +70,18 @@ display(df)
 
 # COMMAND ----------
 
-df.write.option("overwrite","true").saveAsTable("main.merck_ml_ws.diabetes")
+demographic_columns = ["Id","FirstName","LastName","Address","Email","Age"]
+physicals_columns = ["Id","Pregnancies","BloodPressure","BMI"]
+lab_result_columns = ["Id","Glucose","SkinThickness","Insulin", "DiabetesPedigreeFunction", "Outcome"]
 
 # COMMAND ----------
 
-# MAGIC %sql
-# MAGIC SELECT * FROM main.merck_ml_ws.diabetes
+df.select(demographic_columns).write.option("overwrite","true").saveAsTable("main.merck_ml_ws.patient_demographics")
 
 # COMMAND ----------
 
+df.select(physicals_columns).write.option("overwrite","true").saveAsTable("main.merck_ml_ws.patient_pysicals")
 
+# COMMAND ----------
+
+df.select(lab_result_columns).write.option("overwrite","true").saveAsTable("main.merck_ml_ws.patient_lab_results")

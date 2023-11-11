@@ -20,7 +20,19 @@
 # COMMAND ----------
 
 # MAGIC %sql
-# MAGIC DROP TABLE IF EXISTS main.merck_ml_ws.diabetes
+# MAGIC SHOW TABLES IN main.merck_ml_ws
+
+# COMMAND ----------
+
+# MAGIC %sql
+# MAGIC DROP TABLE IF EXISTS main.merck_ml_ws.patient_demographics;
+# MAGIC DROP TABLE IF EXISTS main.merck_ml_ws.patient_lab_results;
+# MAGIC DROP TABLE IF EXISTS main.merck_ml_ws.patient_pysicals;
+
+# COMMAND ----------
+
+# MAGIC %sql
+# MAGIC DROP TABLE IF EXISTS main.merck_ml_ws.diabetes_features;
 
 # COMMAND ----------
 
