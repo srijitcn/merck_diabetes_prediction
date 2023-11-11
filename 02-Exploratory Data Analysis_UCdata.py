@@ -340,7 +340,7 @@ for i,col in enumerate(set(pima_pd[cols2use].columns)-{"Outcome"}):
 
 fig.tight_layout()
 fig.subplots_adjust(top=0.88)
-fig.suptitle('                           Overview', y=0.925);
+fig.suptitle('                               Overview', y=0.925);
 
 # fig.text(0.04, 0.5, 'Variables', va='center', rotation='vertical', fontsize=16)
 
@@ -417,7 +417,17 @@ for i,col in enumerate(set(pima_pd[cols2use].columns)-{'Outcome'}):
 
 # COMMAND ----------
 
-
+# MAGIC %md 
+# MAGIC - General observation of overal median value differences in the variables for patients that were eventually diagnosed with diabetes compared to those who are not. 
+# MAGIC - [Outliers](https://www.itl.nist.gov/div898/handbook/prc/section1/prc16.htm) in each variables for each Outcome category; some more spread out relative to median and IQR, some beyond the Wiskers. 
+# MAGIC
+# MAGIC SMEs to decide if outliers to be in/excluded, and to rule out if the outlier(s) are   
+# MAGIC
+# MAGIC - A measurement error or data entry error, correct the error where possible. 
+# MAGIC - Not a part of the study population (i.e., unusual properties or conditions)?
+# MAGIC - A natural part of the population you are studying? 
+# MAGIC
+# MAGIC <!-- https://statisticsbyjim.com/basics/remove-outliers/ -->
 
 # COMMAND ----------
 
@@ -485,7 +495,7 @@ plt.title("Pearson's Correlation Matrix")
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC #### 5# Quick example of using sklearn.pipelines to transform/process "missing" data we noted earlier
+# MAGIC #### 5# Quick example of using `sklearn.pipelines` to transform/process `"missing"` data we noted earlier
 
 # COMMAND ----------
 
