@@ -230,32 +230,32 @@ pima_sdf2.toPandas().describe() #.describe(include='all')
 # COMMAND ----------
 
 # DBTITLE 1,EDA using Pandas Profiling | [raw]
-# #EDA using Pandas Profiling
-# Preport1 = ProfileReport(pima_sdf1.toPandas()[cols2use],
-#                         title="Pima Indian Diabetes Dataset [Before Preprocessing]",
-#                         # correlations={
-#                         #               "pearson": {"calculate": True},
-#                         #               "spearman": {"calculate": True},
-#                         #               "kendall": {"calculate": True},
-#                         #               "phi_k": {"calculate": True},
-#                         #              },
-#                         plot={
-#                               'correlation':{
-#                               'cmap': 'RdBu_r',
-#                               'bad': '#000000'},
-#                               'fontsize':6,
-#                              },
+#EDA using Pandas Profiling
+Preport1 = ProfileReport(pima_sdf1.toPandas()[cols2use],
+                        title="Pima Indian Diabetes Dataset [Before Preprocessing]",
+                        # correlations={
+                        #               "pearson": {"calculate": True},
+                        #               "spearman": {"calculate": True},
+                        #               "kendall": {"calculate": True},
+                        #               "phi_k": {"calculate": True},
+                        #              },
+                        plot={
+                              'correlation':{
+                              'cmap': 'RdBu_r',
+                              'bad': '#000000'},
+                              'fontsize':6,
+                             },
                         
-#                         sort=None, html={'style':{'full_width':True}},
-#                         # minimal=True
-#                         )
+                        sort=None, html={'style':{'full_width':True}},
+                        # minimal=True
+                        )
                      
-# # Preport1.to_file(output_file= "pandas_profile_output_raw.html")
+# Preport1.to_file(output_file= "pandas_profile_output_raw.html")
 
-# Preport1.to_notebook_iframe()
+Preport1.to_notebook_iframe()
 
-# # from ydata_profiling.utils.cache import cache_file
-# # Preport1.to_widgets()
+# from ydata_profiling.utils.cache import cache_file
+# Preport1.to_widgets()
 
 
 # COMMAND ----------
@@ -266,31 +266,31 @@ pima_sdf2.toPandas().describe() #.describe(include='all')
 # COMMAND ----------
 
 # DBTITLE 1,EDA using Pandas Profiling | [replaced 0]
-# #EDA using Pandas Profiling
+#EDA using Pandas Profiling
 
-# Preport2 = ProfileReport(pima_sdf2.toPandas()[cols2use],
-#                         title="Pima Indian Diabetes Dataset [+ Minimal Preprocessing]",
-#                         correlations={
-#                                       "pearson": {"calculate": True},
-#                                       "spearman": {"calculate": True},
-#                                       "kendall": {"calculate": True},
-#                                       "phi_k": {"calculate": True},
-#                                      },
-#                         plot={
-#                               'correlation':{
-#                               'cmap': 'RdBu_r',
-#                               'bad': '#000000'},
-#                               'fontsize':6,
-#                              },
-#                         sort=None, html={'style':{'full_width':True}}
-#                         )
+Preport2 = ProfileReport(pima_sdf2.toPandas()[cols2use],
+                        title="Pima Indian Diabetes Dataset [+ Minimal Preprocessing]",
+                        correlations={
+                                      "pearson": {"calculate": True},
+                                      "spearman": {"calculate": True},
+                                      "kendall": {"calculate": True},
+                                      "phi_k": {"calculate": True},
+                                     },
+                        plot={
+                              'correlation':{
+                              'cmap': 'RdBu_r',
+                              'bad': '#000000'},
+                              'fontsize':6,
+                             },
+                        sort=None, html={'style':{'full_width':True}}
+                        )
                      
-# # Preport2.to_file(output_file= "pandas_profile_output_cleaner0.html")
+# Preport2.to_file(output_file= "pandas_profile_output_cleaner0.html")
 
-# Preport2.to_notebook_iframe()
+Preport2.to_notebook_iframe()
 
-# # from ydata_profiling.utils.cache import cache_file
-# # Preport2.to_widgets()
+# from ydata_profiling.utils.cache import cache_file
+# Preport2.to_widgets()
 
 
 # COMMAND ----------
