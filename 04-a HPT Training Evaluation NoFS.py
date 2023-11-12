@@ -100,6 +100,11 @@ def get_model(model_params):
 # COMMAND ----------
 
 # MAGIC %md
+# MAGIC #### HyperOpt library
+
+# COMMAND ----------
+
+# MAGIC %md
 # MAGIC #### Create Objective Function
 # MAGIC
 
