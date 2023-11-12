@@ -308,3 +308,11 @@ if not uc_enabled:
                                         version=model_details.version,
                                         stage="Staging",
                                         archive_existing_versions=True)
+
+# COMMAND ----------
+
+result
+
+# COMMAND ----------
+
+

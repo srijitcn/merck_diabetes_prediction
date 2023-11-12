@@ -32,4 +32,5 @@ spark.sql(f"DROP TABLE IF EXISTS {feature_table_name}")
 
 # COMMAND ----------
 
-spark.sql(f"DROP TABLE IF EXISTS {inference_data_table}")
+spark.sql(f"DROP TABLE IF EXISTS {inference_data_table_nonfs}")
+spark.sql(f"DROP TABLE IF EXISTS {inference_data_table_fs}")

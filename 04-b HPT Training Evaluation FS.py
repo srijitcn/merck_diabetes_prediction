@@ -346,8 +346,8 @@ from mlflow.tracking.client import MlflowClient
 
 if not uc_enabled:
   mlflow_client = MlflowClient()
-  model_details = get_latest_model_info(registered_model_name_non_fs,"None")
-  result = mlflow_client.transition_model_version_stage(name=registered_model_name_non_fs,
+  model_details = get_latest_model_info(registered_model_name_fs,"None")
+  result = mlflow_client.transition_model_version_stage(name=registered_model_name_fs,
                                         version=model_details.version,
                                         stage="Staging",
                                         archive_existing_versions=True)
