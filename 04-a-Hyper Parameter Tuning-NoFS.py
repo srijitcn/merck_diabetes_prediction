@@ -4,6 +4,10 @@
 
 # COMMAND ----------
 
+# MAGIC %run ./init
+
+# COMMAND ----------
+
 numeric_columns = ["Age", "BloodPressure", "Insulin", "BMI", "SkinThickness", "DiabetesPedigreeFunction", "Pregnancies", "Glucose"]
 non_zero_columns = ["BloodPressure", "SkinThickness" , "BMI"]
 categorical_columns = []
@@ -11,15 +15,6 @@ label_column = "Outcome"
 key_column = "Id"
 
 feature_cols = numeric_columns + categorical_columns
-
-# COMMAND ----------
-
-catalog = "main"
-database = "merck_ml_ws"
-
-demographic_table = f"{catalog}.{database}.patient_demographics"
-lab_results_table = f"{catalog}.{database}.patient_lab_results"
-physicals_results_table = f"{catalog}.{database}.patient_pysicals"
 
 # COMMAND ----------
 
@@ -117,7 +112,7 @@ from sklearn.metrics import f1_score,roc_auc_score
 from hyperopt import fmin, tpe, hp, SparkTrials, STATUS_OK
 import numpy as np
 
-mlflow.set_registry_uri("databricks-uc")
+mlflow.set_registry_uri(model_registry_uri)
 
 user_name = dbutils.notebook.entry_point.getDbutils().notebook().getContext().userName().get()
 db_host = dbutils.notebook.entry_point.getDbutils().notebook().getContext().apiUrl().get()
@@ -225,7 +220,7 @@ model_info = mlflow.sklearn.log_model(
     selected_model,
     signature = signature,
     artifact_path="model",
-    registered_model_name="main.merck_ml_ws.ws_diabetes_prediction_nonfs",
+    registered_model_name=registered_model_name_non_fs,
     input_example=input_example,
     pip_requirements = ["emoji==2.8.0"]
 )

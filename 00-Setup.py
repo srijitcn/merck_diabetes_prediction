@@ -14,25 +14,21 @@
 
 # COMMAND ----------
 
-# MAGIC %sql
-# MAGIC CREATE DATABASE IF NOT EXISTS main.merck_ml_ws
+# MAGIC %run ./init
 
 # COMMAND ----------
 
-# MAGIC %sql
-# MAGIC SHOW TABLES IN main.merck_ml_ws
+spark.sql(f"CREATE DATABASE IF NOT EXISTS {database}")
 
 # COMMAND ----------
 
-# MAGIC %sql
-# MAGIC DROP TABLE IF EXISTS main.merck_ml_ws.patient_demographics;
-# MAGIC DROP TABLE IF EXISTS main.merck_ml_ws.patient_lab_results;
-# MAGIC DROP TABLE IF EXISTS main.merck_ml_ws.patient_pysicals;
+spark.sql(f"DROP TABLE IF EXISTS {demographic_table}")
+spark.sql(f"DROP TABLE IF EXISTS {lab_results_table}")
+spark.sql(f"DROP TABLE IF EXISTS {physicals_results_table}")
 
 # COMMAND ----------
 
-# MAGIC %sql
-# MAGIC DROP TABLE IF EXISTS main.merck_ml_ws.diabetes_features;
+spark.sql(f"DROP TABLE IF EXISTS {feature_table_name}")
 
 # COMMAND ----------
 

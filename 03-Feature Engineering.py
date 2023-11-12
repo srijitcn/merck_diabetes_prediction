@@ -34,12 +34,7 @@ displayHTML(
 
 # COMMAND ----------
 
-catalog = "main"
-database = "merck_ml_ws"
-
-demographic_table = f"{catalog}.{database}.patient_demographics"
-lab_results_table = f"{catalog}.{database}.patient_lab_results"
-physicals_results_table = f"{catalog}.{database}.patient_pysicals"
+# MAGIC %run ./init
 
 # COMMAND ----------
 
@@ -71,8 +66,6 @@ from databricks import feature_store
 fs = feature_store.FeatureStoreClient()
 
 # COMMAND ----------
-
-feature_table_name = f"{catalog}.{database}.diabetes_features"
 
 fs.create_table(
     name=feature_table_name,

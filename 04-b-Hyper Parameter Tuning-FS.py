@@ -4,6 +4,10 @@
 
 # COMMAND ----------
 
+# MAGIC %run ./init
+
+# COMMAND ----------
+
 numeric_columns = ["Age", "BloodPressure", "Insulin", "BMI", "SkinThickness", "DiabetesPedigreeFunction", "Pregnancies", "Glucose"]
 non_zero_columns = ["BloodPressure", "SkinThickness" , "BMI"]
 categorical_columns = []
@@ -14,18 +18,13 @@ feature_cols = numeric_columns + categorical_columns
 
 # COMMAND ----------
 
-catalog = "main"
-database = "merck_ml_ws"
-
-# COMMAND ----------
-
 # MAGIC %md
 # MAGIC #### Read Raw Data
 # MAGIC We start with the table that has the results we want to use
 
 # COMMAND ----------
 
-patient_lab_data = spark.table(f"{catalog}.{database}.patient_lab_results").select(key_column, label_column)
+patient_lab_data = spark.table(lab_results_table)
 
 # COMMAND ----------
 
@@ -77,14 +76,12 @@ from databricks import feature_store
 from databricks.feature_store import FeatureLookup
 
 
-feature_table = f"{catalog}.{database}.diabetes_features"
-
 fs = feature_store.FeatureStoreClient()
 
 feature_lookups = [
     FeatureLookup(
-        table_name=feature_table,
-        feature_names= feature_cols,
+        table_name=feature_table_name,
+        feature_names= ["Age", "BloodPressure", "BMI", "Pregnancies"],
         lookup_key=[key_column]
     ),
 ]
@@ -175,7 +172,7 @@ from sklearn.metrics import f1_score,roc_auc_score
 from hyperopt import fmin, tpe, hp, SparkTrials, STATUS_OK
 import numpy as np
 
-mlflow.set_registry_uri("databricks-uc")
+mlflow.set_registry_uri(model_registry_uri)
 
 user_name = dbutils.notebook.entry_point.getDbutils().notebook().getContext().userName().get()
 db_host = dbutils.notebook.entry_point.getDbutils().notebook().getContext().apiUrl().get()
@@ -278,7 +275,7 @@ fs.log_model(
     artifact_path="model",
     flavor=mlflow.sklearn,    
     training_set=training_set,
-    registered_model_name="main.merck_ml_ws.ws_diabetes_prediction_fs",
+    registered_model_name=registered_model_name_fs,
     pip_requirements = ["emoji==2.8.0"],
     input_example=input_example,
 )

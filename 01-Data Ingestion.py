@@ -7,6 +7,10 @@ dbutils.library.restartPython()
 
 # COMMAND ----------
 
+# MAGIC %run ./init
+
+# COMMAND ----------
+
 data_file_name = "s3://databricks-e2demofieldengwest/external_location_srijit_nair/merck/diabetes.csv"
 
 # COMMAND ----------
@@ -76,12 +80,12 @@ lab_result_columns = ["Id","Glucose","SkinThickness","Insulin", "DiabetesPedigre
 
 # COMMAND ----------
 
-df.select(demographic_columns).write.option("overwrite","true").saveAsTable("main.merck_ml_ws.patient_demographics")
+df.select(demographic_columns).write.option("overwrite","true").saveAsTable(demographic_table)
 
 # COMMAND ----------
 
-df.select(physicals_columns).write.option("overwrite","true").saveAsTable("main.merck_ml_ws.patient_pysicals")
+df.select(lab_result_columns).write.option("overwrite","true").saveAsTable(lab_results_table)
 
 # COMMAND ----------
 
-df.select(lab_result_columns).write.option("overwrite","true").saveAsTable("main.merck_ml_ws.patient_lab_results")
+df.select(physicals_columns).write.option("overwrite","true").saveAsTable(physicals_results_table)
