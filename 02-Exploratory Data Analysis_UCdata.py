@@ -218,6 +218,12 @@ display(pima_sdf2.select(*['State']+cols2use))
 
 # COMMAND ----------
 
+# MAGIC %md 
+# MAGIC PySpark is especially great for preprocessing large datasets efficiently and you can easily convert these sparkDF to pandasDF.    
+# MAGIC Let's take a look at doing just that and work in a more familiar coding environment. 
+
+# COMMAND ----------
+
 # DBTITLE 1,Pandas DataFrame [pd]
 # MAGIC %md
 # MAGIC ###3. EDA with Pandas Profiling
