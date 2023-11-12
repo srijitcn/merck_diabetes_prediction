@@ -185,6 +185,11 @@ search_space = {
 
 # COMMAND ----------
 
+# MAGIC %md
+# MAGIC #### HyperParameter Tuning and Training
+
+# COMMAND ----------
+
 trials = SparkTrials()
 fmin(
   fn=loss_fn,
@@ -200,8 +205,48 @@ best_run = mlflow.search_runs(experiment_ids=[experiment.experiment_id], order_b
 
 # COMMAND ----------
 
+# MAGIC %md
+# MAGIC #### Evaluate Model
+
+# COMMAND ----------
+
 model_uri = f"runs:/{best_run.run_id}/model"
 selected_model = mlflow.sklearn.load_model(model_uri)
+
+# COMMAND ----------
+
+from sklearn.model_selection import cross_val_score
+score = cross_val_score(selected_model, x_test, y_test, cv=5, scoring='f1')
+print(f"F1 score of mode is {score}")
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC #### Plot Model Performance
+
+# COMMAND ----------
+
+import matplotlib.pyplot as plt
+from sklearn import metrics
+
+image_roc_curve = metrics.plot_roc_curve(selected_model, x_test, y_test)
+plt.show()
+
+# COMMAND ----------
+
+image_confusion_matrix = metrics.plot_confusion_matrix(selected_model, x_test, y_test)
+plt.show()
+
+# COMMAND ----------
+
+image_precision_recall_curve = metrics.plot_precision_recall_curve(selected_model, x_test, y_test)
+plt.show()
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC #### Register Model
+# MAGIC Now that we have a good confidence in the model, let us register in the model registry and promote the model to Staging for integration testing
 
 # COMMAND ----------
 
@@ -221,15 +266,45 @@ input_example = {
     "Glucose":85.0
     }
 
-model_info = mlflow.sklearn.log_model(
-    selected_model,
-    signature = signature,
-    artifact_path="model",
-    registered_model_name=registered_model_name_non_fs,
-    input_example=input_example,
-    pip_requirements = ["emoji==2.8.0"]
-)
+with mlflow.start_run() as run:
+
+    model_info = mlflow.sklearn.log_model(
+        selected_model,
+        signature = signature,
+        artifact_path="model",
+        registered_model_name=registered_model_name_non_fs,
+        input_example=input_example,
+        pip_requirements = ["emoji==2.8.0"]
+    )
+
+    eval_data = x_test
+    eval_data["target"] = y_test
+    result = mlflow.evaluate(
+        model_info.model_uri,
+        eval_data,
+        targets="target",
+        model_type="classifier",
+        evaluators=["default"]
+    )
+
+    run_data = mlflow.get_run(best_run.run_id).data.to_dictionary()
+    mlflow.log_params(run_data["params"])
 
 # COMMAND ----------
 
+# MAGIC %md
+# MAGIC #### Promote Model to Staging
+# MAGIC ##### Non Unity Catalog Only
+# MAGIC Workspace MLflow Model Registry defines several model stages: None, Staging, Production, and Archived. Each stage has a unique meaning. For example, Staging is meant for model integration testing, while Production is for models that have completed the testing or review processes and have been deployed to applications.
 
+# COMMAND ----------
+
+from mlflow.tracking.client import MlflowClient
+
+if not uc_enabled:
+  mlflow_client = MlflowClient()
+  model_details = get_latest_model_info(registered_model_name_non_fs,"None")
+  result = mlflow_client.transition_model_version_stage(name=registered_model_name_non_fs,
+                                        version=model_details.version,
+                                        stage="Staging",
+                                        archive_existing_versions=True)
