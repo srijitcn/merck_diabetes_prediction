@@ -67,6 +67,20 @@
 
 # COMMAND ----------
 
+# DBTITLE 1,Data 
+# catalog = "main"
+# database = "merck_ml_ws"
+# diabetes_data_table = f"{catalog}.{database}.diabetes"
+
+# data_file_name = "s3://databricks-e2demofieldengwest/external_location_srijit_nair/merck/diabetes.csv"
+
+# COMMAND ----------
+
+# DBTITLE 1,Run 01-Data Ingestion 
+# MAGIC %run "./01-Data Ingestion"
+
+# COMMAND ----------
+
 # DBTITLE 1,Import Relevant Libraries 
 import pyspark.sql.functions as F
 import pyspark.sql.types as T
@@ -80,14 +94,6 @@ import seaborn as sns
 from ydata_profiling import ProfileReport
 # from ydata_profiling.utils.cache import cache_file
 
-
-# COMMAND ----------
-
-# DBTITLE 1,Data in UC | to update to non-UC
-catalog = "main"
-database = "merck_ml_ws"
-
-diabetes_data_table = f"{catalog}.{database}.diabetes"
 
 # COMMAND ----------
 
@@ -122,7 +128,8 @@ def extract_stateNzip_fromAddress(sdf, getState=True, getZip=False):
 # COMMAND ----------
 
 # DBTITLE 1,Read in data | to update wrt non-UC
-pima_sdf0 = spark.table(diabetes_data_table)
+# pima_sdf0 = spark.table(diabetes_data_table)
+pima_sdf0 = df ## from "./01-Data Ingestion" notebook
 
 pii_cols = ['FirstName', 'LastName','Email','Address']
 
