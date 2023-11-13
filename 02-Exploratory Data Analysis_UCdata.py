@@ -590,13 +590,13 @@ pd.DataFrame(pima_sdf0_pdT, columns=nonZeroCols).head(15)
 # COMMAND ----------
 
 # DBTITLE 1,Run an AutoML 
-import databricks.automl
+# import databricks.automl
  
-summary = databricks.automl.classify(pima_pd[cols2use], 
-                                     target_col="Outcome",                                     
-                                     timeout_minutes=10, 
-                                     #primary_metric='roc_auc", #"precision", # default=f1
-                                    )
+# summary = databricks.automl.classify(pima_pd[cols2use], 
+#                                      target_col="Outcome",                                     
+#                                      timeout_minutes=10, 
+#                                      #primary_metric='roc_auc", #"precision", # default=f1
+#                                     )
                                     
 
 # COMMAND ----------
