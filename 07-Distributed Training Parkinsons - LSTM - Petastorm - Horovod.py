@@ -287,13 +287,24 @@ converter_test = make_spark_converter(test_df, parquet_row_group_size_bytes=int(
 import horovod.tensorflow.keras as hvd
 from sparkdl import HorovodRunner
 import os
- 
+from datetime import datetime
+
 checkpoint_dir = f"file:///dbfs/workshop/temp/cache/{user_name}/lstm/parkinsons/petastorm_checkpoint_weights"
 dbutils.fs.rm(checkpoint_dir, True)
 batch_size = 100
 initial_lr = 0.1
 num_epoch = 1
 
+user_name = dbutils.notebook.entry_point.getDbutils().notebook().getContext().userName().get()
+db_host = dbutils.notebook.entry_point.getDbutils().notebook().getContext().apiUrl().get()
+db_token = dbutils.notebook.entry_point.getDbutils().notebook().getContext().apiToken().get()
+
+#Create an MLFlow experiment
+experiment_tag = f"parkinsons_prediction_{datetime.now().strftime('%d-%m-%Y')}"
+experiment_path = f"/Users/{user_name}/mlflow_experiments/{experiment_tag}"
+ 
+# Manually create the experiment so that you can get the ID and can send it to the worker nodes for scaling
+experiment = mlflow.set_experiment(experiment_path)
    
 def run_training_horovod():
     # Horovod: initialize Horovod.
@@ -302,10 +313,13 @@ def run_training_horovod():
 
     hvd.init()    
     mlflow.set_tracking_uri("databricks")
-    os.environ['DATABRICKS_HOST'] = databricks_host
-    os.environ['DATABRICKS_TOKEN'] = databricks_token
+    os.environ['DATABRICKS_HOST'] = db_host
+    os.environ['DATABRICKS_TOKEN'] = db_token
 
-    with converter_train.make_tf_dataset(batch_size=batch_size, num_epochs=None, cur_shard=hvd.rank(), shard_count=hvd.size()) as train_dataset:
+    with converter_train.make_tf_dataset(batch_size=batch_size, 
+                                         num_epochs=None, 
+                                         cur_shard=hvd.rank(), 
+                                         shard_count=hvd.size()) as train_dataset:
         
         dataset = train_dataset.map( lambda x: (tf.reshape(x.series, [-1,time_steps,num_features]), x.label) )
         
@@ -352,9 +366,6 @@ def run_training_horovod():
 
 # COMMAND ----------
 
-## Init MLFlow
-databricks_host = mlflow.utils.databricks_utils.get_webapp_url()
-databricks_token = dbutils.notebook.entry_point.getDbutils().notebook().getContext().apiToken().getOrElse(None)
 
 with mlflow.start_run() as run: 
     active_run_id = mlflow.active_run().info.run_id

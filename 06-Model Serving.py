@@ -67,13 +67,14 @@ from databricks.sdk.service.serving import *
 from datetime import timedelta
 w = WorkspaceClient(host=db_host,token=db_token)
 
+endpoint_name = f"{registered_model_name_non_fs}_endpoint"
+
 served_models = [ServedModelInput(model_name=registered_model_name_non_fs, 
                                    model_version=model_info.version, 
                                    workload_size='Small',
                                    workload_type='CPU', 
                                    scale_to_zero_enabled='True')]
 
-endpoint_name = f"{registered_model_name_non_fs}_endpoint"
 
 print(f"Creating model serving endpoint {endpoint_name}")
 
