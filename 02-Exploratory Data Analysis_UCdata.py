@@ -582,17 +582,21 @@ pd.DataFrame(pima_sdf0_pdT, columns=nonZeroCols).head(15)
 # MAGIC - We can run an AutoML with the minimally processed pandas_df 
 # MAGIC - Look into Feature Engineering, Hyperparameter Tuning ---> Data Modeling
 # MAGIC
-# MAGIC **automl** api ref : https://docs.databricks.com/en/machine-learning/automl/train-ml-model-automl-api.html 
+# MAGIC **automl** 
+# MAGIC - ref: https://docs.databricks.com/en/machine-learning/automl/how-automl-works.html
+# MAGIC - api ref : https://docs.databricks.com/en/machine-learning/automl/train-ml-model-automl-api.html 
+# MAGIC
 
 # COMMAND ----------
 
 # DBTITLE 1,Run an AutoML 
-# import databricks.automl
+import databricks.automl
  
-# summary = databricks.automl.classify(pima_pd[cols2use], 
-#                                      target_col="Outcome",                                     
-#                                      timeout_minutes=6, 
-#                                     )
+summary = databricks.automl.classify(pima_pd[cols2use], 
+                                     target_col="Outcome",                                     
+                                     timeout_minutes=10, 
+                                     #primary_metric='roc_auc", #"precision", # default=f1
+                                    )
                                     
 
 # COMMAND ----------
