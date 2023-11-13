@@ -63,5 +63,7 @@ from databricks.sdk.service.serving import *
 w = WorkspaceClient(host=db_host,token=db_token)
 
 endpoint_name = f"{registered_model_name_non_fs}_endpoint"
-
-w.serving_endpoints.delete(name=endpoint_name)
+try:
+  w.serving_endpoints.delete(name=endpoint_name)  
+except:
+  print(f"Endpoint {endpoint_name} does not exist")
