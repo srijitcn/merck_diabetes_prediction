@@ -1,6 +1,14 @@
 # Databricks notebook source
 # MAGIC %md
 # MAGIC #### Prepare Data
+# MAGIC
+# MAGIC For this exercise, we will train a LGBM classfier for Diabetes prediction. We will not be using Feature Store
+
+# COMMAND ----------
+
+#for model serving compatibility
+#%pip install scikit-learn==1.3.2
+#dbutils.library.restartPython()
 
 # COMMAND ----------
 
@@ -19,8 +27,8 @@ feature_cols = numeric_columns + categorical_columns
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC #### Read Raw Data
-# MAGIC We start with the table that has the results we want to use
+# MAGIC #### Create Features
+# MAGIC Since we are not using Feature Store in this example, we need to join the appropriate tables to get the features for our training
 
 # COMMAND ----------
 
@@ -41,6 +49,18 @@ display(feature_data)
 
 # COMMAND ----------
 
+# MAGIC %md
+# MAGIC #### Test Train Data Split
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC **NOTE**: The data we used in this exercise is small to fit in driver memory. So we can convert the Spark Dataframe into a Pandas dataframe for ease of use. 
+# MAGIC
+# MAGIC In case, the training data is large, we should avoid collecting the data to driver and creating a pandas dataframe. Instead, we should use data parellel distributed training. [Learn more about Distributed Training on Databricks](https://docs.databricks.com/en/machine-learning/train-model/distributed-training/index.html)
+
+# COMMAND ----------
+
 from sklearn.model_selection import train_test_split
 
 training_df_pd = feature_data.toPandas()
@@ -53,6 +73,8 @@ x_train, x_test, y_train, y_test = train_test_split(x, y, stratify=y, test_size=
 
 # MAGIC %md
 # MAGIC #### Create Model
+# MAGIC
+# MAGIC We will use an LGBM CLassifier for this exercise. LGBMClassifier stands for Light Gradient Boosting Machine Classifier. It uses decision tree algorithms for ranking, classification, and other machine-learning tasks. LGBMClassifier uses a novel technique of Gradient-based One-Side Sampling (GOSS) and Exclusive Feature Bundling (EFB) to handle large-scale data with accuracy, effectively making it faster and reducing memory usage.
 
 # COMMAND ----------
 
@@ -101,6 +123,19 @@ def get_model(model_params):
 
 # MAGIC %md
 # MAGIC #### HyperOpt library
+# MAGIC Databricks Runtime ML includes Hyperopt, a Python library that facilitates distributed hyperparameter tuning and model selection. With Hyperopt, you can scan a set of Python models while varying algorithms and hyperparameters across spaces that you define. Hyperopt works with both distributed ML algorithms such as Apache Spark MLlib and Horovod, as well as with single-machine ML models such as scikit-learn and TensorFlow.
+# MAGIC
+# MAGIC The basic steps when using Hyperopt are:
+# MAGIC
+# MAGIC - Define an objective function to minimize. Typically this is the training or validation loss.
+# MAGIC - Define the hyperparameter search space. Hyperopt provides a conditional search space, which lets you compare different ML algorithms in the same run.
+# MAGIC - Specify the search algorithm. Hyperopt uses stochastic tuning algorithms that perform a more efficient search of hyperparameter space than a deterministic grid search.
+# MAGIC - Run the Hyperopt function fmin(). fmin() takes the items you defined in the previous steps and identifies the set of hyperparameters that minimizes the objective function.
+# MAGIC
+# MAGIC Read more about
+# MAGIC - [HyperOpt Concepts](https://docs.databricks.com/en/machine-learning/automl-hyperparam-tuning/hyperopt-concepts.html)
+# MAGIC - [Use distributed training algorithms with Hyperopt](https://docs.databricks.com/en/machine-learning/automl-hyperparam-tuning/hyperopt-distributed-ml.html)
+# MAGIC - [Best practices: Hyperparameter tuning with Hyperopt](https://docs.databricks.com/en/machine-learning/automl-hyperparam-tuning/hyperopt-best-practices.html)
 
 # COMMAND ----------
 
@@ -124,8 +159,8 @@ db_host = dbutils.notebook.entry_point.getDbutils().notebook().getContext().apiU
 db_token = dbutils.notebook.entry_point.getDbutils().notebook().getContext().apiToken().get()
 
 #Create an MLFlow experiment
-experiment_tag = f"diabetes_prediction_{datetime.now().strftime('%d-%m-%Y_%H-%M-%S')}"
-experiment_path = f'/Users/{user_name}/mlflow_experiments/{experiment_tag}'
+experiment_tag = f"diabetes_prediction_nofs_{datetime.now().strftime('%d-%m-%Y')}"
+experiment_path = f"/Users/{user_name}/mlflow_experiments/{experiment_tag}"
  
 # Manually create the experiment so that you can get the ID and can send it to the worker nodes for scaling
 experiment = mlflow.set_experiment(experiment_path)
@@ -195,7 +230,7 @@ fmin(
   fn=loss_fn,
   space=search_space,
   algo=algo,
-  max_evals=5,
+  max_evals=10,
   trials=trials)
 
 
@@ -229,17 +264,20 @@ print(f"F1 score of mode is {score}")
 import matplotlib.pyplot as plt
 from sklearn import metrics
 
-image_roc_curve = metrics.plot_roc_curve(selected_model, x_test, y_test)
+fig1, axs1 = plt.subplots(1)
+image_roc_curve = metrics.plot_roc_curve(selected_model, x_test, y_test,ax=axs1)
 plt.show()
 
 # COMMAND ----------
 
-image_confusion_matrix = metrics.plot_confusion_matrix(selected_model, x_test, y_test)
+fig2, axs2 = plt.subplots(1)
+image_confusion_matrix = metrics.plot_confusion_matrix(selected_model, x_test, y_test,ax=axs2)
 plt.show()
 
 # COMMAND ----------
 
-image_precision_recall_curve = metrics.plot_precision_recall_curve(selected_model, x_test, y_test)
+fig3, axs3 = plt.subplots(1)
+image_precision_recall_curve = metrics.plot_precision_recall_curve(selected_model, x_test, y_test,ax=axs3)
 plt.show()
 
 # COMMAND ----------
@@ -274,7 +312,7 @@ with mlflow.start_run() as run:
         artifact_path="model",
         registered_model_name=registered_model_name_non_fs,
         input_example=input_example,
-        pip_requirements = ["emoji==2.8.0"]
+        pip_requirements = ["lightgbm==3.3.5","scikit-learn==1.1.1"]
     )
 
     eval_data = x_test
@@ -290,10 +328,19 @@ with mlflow.start_run() as run:
     run_data = mlflow.get_run(best_run.run_id).data.to_dictionary()
     mlflow.log_params(run_data["params"])
 
+    mlflow.log_figure(fig1, 'sklearn_roc_curve.png')
+    mlflow.log_figure(fig2, 'sklearn_confusion_matrix.png')
+    mlflow.log_figure(fig3, 'sklearn_precision_recall_curve.png')
+
+
 # COMMAND ----------
 
 # MAGIC %md
 # MAGIC #### Promote Model to Staging
+
+# COMMAND ----------
+
+# MAGIC %md
 # MAGIC ##### Non Unity Catalog Only
 # MAGIC Workspace MLflow Model Registry defines several model stages: None, Staging, Production, and Archived. Each stage has a unique meaning. For example, Staging is meant for model integration testing, while Production is for models that have completed the testing or review processes and have been deployed to applications.
 
@@ -303,15 +350,28 @@ from mlflow.tracking.client import MlflowClient
 
 if not uc_enabled:
   mlflow_client = MlflowClient()
-  model_details = get_latest_model_info(registered_model_name_non_fs,"None")
+  model_details = get_latest_model_version(registered_model_name_non_fs,"None")
   result = mlflow_client.transition_model_version_stage(name=registered_model_name_non_fs,
                                         version=model_details.version,
                                         stage="Staging",
                                         archive_existing_versions=True)
+  
+  print(result)
 
 # COMMAND ----------
 
-result
+# MAGIC %md
+# MAGIC ##### Unity Catalog Only
+# MAGIC We will use aliases in case Unity Catalog Managed model registry
+
+# COMMAND ----------
+
+if uc_enabled:
+  mlflow_client = MlflowClient()
+  model_details = get_latest_model_version(registered_model_name_non_fs)
+  result = mlflow_client.set_registered_model_alias(registered_model_name_non_fs,
+                                                    version=model_details.version, 
+                                                    alias="challenger")
 
 # COMMAND ----------
 

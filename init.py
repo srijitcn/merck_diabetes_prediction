@@ -1,6 +1,6 @@
 # Databricks notebook source
 # MAGIC %md
-# MAGIC #### Initialization
+# MAGIC ###### Initialization
 # MAGIC
 # MAGIC We will initialize few variables and declare some utility functions
 # MAGIC
@@ -10,12 +10,23 @@
 
 # COMMAND ----------
 
-user_name = dbutils.notebook.entry_point.getDbutils().notebook().getContext().userName().get().split('@')[0]
+user_email = dbutils.notebook.entry_point.getDbutils().notebook().getContext().userName().get()
+user_name = user_email.split('@')[0]
 user_prefix = f"{user_name[0:4]}{str(len(user_name)).rjust(3, '0')}"
 
 # COMMAND ----------
 
-uc_enabled = False
+import requests
+db_host = spark.conf.get('spark.databricks.workspaceUrl')
+db_token = dbutils.notebook.entry_point.getDbutils().notebook().getContext().apiToken().getOrElse(None)
+db_cluster_id = spark.conf.get("spark.databricks.clusterUsageTags.clusterId")
+headers = {"Authorization": f"Bearer {db_token}"}
+url = f"https://{db_host}/api/2.0/clusters/get?cluster_id={db_cluster_id}"
+response = requests.get(url, headers=headers).json()
+uc_enabled = False if response["data_security_mode"]=="NONE" else True
+
+# COMMAND ----------
+
 catalog = "main"
 database = "merck_ml_ws"
 
@@ -61,11 +72,50 @@ print(f"***************************************************")
 
 import mlflow
 from mlflow.tracking.client import MlflowClient
-#Gets the 
-def get_latest_model_info(model_name: str, env: str):
-  client = MlflowClient()
-  models = client.get_latest_versions(model_name, stages=[env])
-  if len(models) >0:
-    return models[0]
+
+# COMMAND ----------
+
+
+#Gets the latest model details
+def get_latest_model_version(model_name: str, env_or_alias: str=""):  
+  #If UC is not enabled we will use workspace registry
+  if not uc_enabled:
+    mlflow.set_registry_uri("databricks")
+    client = MlflowClient()
+    models = client.get_latest_versions(model_name, stages=[env_or_alias])
+    if len(models) >0:
+      return models[0]
+    else:
+      return None
+  #If UC is enabled we will use UC api
   else:
-    return None
+    mlflow.set_registry_uri("databricks-uc")
+    client = MlflowClient()
+
+    if env_or_alias == "":
+      models = client.search_model_versions(f"name='{model_name}'")
+      if len(models) >0:
+        return models[0]
+      else:
+        return None
+    else:
+      try:
+        return client.get_model_version_by_alias(name=model_name,alias=env_or_alias)
+      except:
+        return None
+
+
+# COMMAND ----------
+
+def get_model_uri(model_info,env_or_alias):
+  if model_info:
+    if uc_enabled:
+      return f"models:/{model_info.name}@{env_or_alias}"
+    else:
+      return f"models:/{model_info.name}/{env_or_alias}"
+  else:
+    raise Exception("No model versions are registered for production use")
+
+# COMMAND ----------
+
+

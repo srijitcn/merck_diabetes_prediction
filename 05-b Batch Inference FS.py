@@ -33,15 +33,13 @@ display(spark.sql(f"SELECT * FROM {inference_data_table_fs}"))
 
 # COMMAND ----------
 
-model_info = get_latest_model_info(registered_model_name_fs,"Production")
+env_or_alias = "champion" if uc_enabled else "production"
+model_info = get_latest_model_version(registered_model_name_fs, env_or_alias)
+model_uri = get_model_uri(model_info,env_or_alias)
 
 # COMMAND ----------
 
-model_uri = ""
-if model_info:
-  model_uri = f"models:/{registered_model_name_fs}/{model_info.version}"
-else:
-  raise Exception("No model versions are registered for production use")
+model_uri
 
 # COMMAND ----------
 
@@ -66,3 +64,7 @@ result_df = fs.score_batch(model_uri, data)
 # COMMAND ----------
 
 display(result_df)
+
+# COMMAND ----------
+
+

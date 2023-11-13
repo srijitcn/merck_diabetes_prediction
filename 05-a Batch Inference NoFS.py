@@ -1,4 +1,10 @@
 # Databricks notebook source
+# MAGIC %md
+# MAGIC #### Batch and Streaming Inference on Databricks
+# MAGIC On Databricks, you can deploy MLflow models for offline (batch and streaming) inference. Databricks recommends that you use MLflow to deploy machine learning models for batch or streaming inference. For general information about working with MLflow models, see [Log, load, register, and deploy MLflow models](https://docs.databricks.com/en/mlflow/models.html).
+
+# COMMAND ----------
+
 # MAGIC %run ./init
 
 # COMMAND ----------
@@ -30,15 +36,9 @@ display(spark.sql(f"SELECT * FROM {inference_data_table_nonfs}"))
 
 # COMMAND ----------
 
-model_info = get_latest_model_info(registered_model_name_non_fs,"Production")
-
-# COMMAND ----------
-
-model_uri = ""
-if model_info:
-  model_uri = f"models:/{registered_model_name_non_fs}/{model_info.version}"
-else:
-  raise Exception("No model versions are registered for production use")
+env_or_alias = "champion" if uc_enabled else "production"
+model_info = get_latest_model_version(registered_model_name_non_fs, env_or_alias)
+model_uri = get_model_uri(model_info,env_or_alias)
 
 # COMMAND ----------
 
@@ -58,6 +58,7 @@ req_file = mlflow.pyfunc.get_model_dependencies(model_uri)
 # COMMAND ----------
 
 # Create the PySpark UDF
+print(f"Creating pyfunc from model uri: {model_uri}")
 predict_diabetes_udf = mlflow.pyfunc.spark_udf(spark, model_uri=model_uri)
 
 # COMMAND ----------
