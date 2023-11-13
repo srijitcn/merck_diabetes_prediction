@@ -11,7 +11,7 @@
 # COMMAND ----------
 
 user_email = dbutils.notebook.entry_point.getDbutils().notebook().getContext().userName().get()
-user_name = user_email.split('@')[0]
+user_name = user_email.split('@')[0].replace('.','_')
 user_prefix = f"{user_name[0:4]}{str(len(user_name)).rjust(3, '0')}"
 
 # COMMAND ----------
@@ -36,6 +36,7 @@ physicals_results_table = f"{database}.patient_pysicals"
 feature_table_name = f"{database}.diabetes_features_{user_prefix}"
 inference_data_table_nonfs = f"{database}.patient_data_nonfs_{user_prefix}"
 inference_data_table_fs = f"{database}.patient_data_fs_{user_prefix}"
+raw_data_table = f"{database}.diabetes_raw_{user_prefix}"
 
 model_registry_uri = "databricks"
 registered_model_name_non_fs = f"{user_prefix}_diabetes_prediction_nonfs"
@@ -52,6 +53,8 @@ if uc_enabled :
   feature_table_name =  f"{catalog}.{feature_table_name}"
   inference_data_table_nonfs = f"{catalog}.{inference_data_table_nonfs}"
   inference_data_table_fs = f"{catalog}.{inference_data_table_fs}"
+  raw_data_table = f"{catalog}.{raw_data_table}"
+
   model_registry_uri = "databricks-uc"
   registered_model_name_non_fs = f"{catalog}.{database}.{registered_model_name_non_fs}"
   registered_model_name_fs = f"{catalog}.{database}.{registered_model_name_fs}"  
@@ -62,6 +65,7 @@ print(f"Physicals Result table (physicals_results_table): {physicals_results_tab
 print(f"Feature table (feature_table_name): {feature_table_name}")
 print(f"Inference Data table Non Feature Store (inference_data_table_nonfs): {inference_data_table_nonfs}")
 print(f"Inference Data table Feature Store (inference_data_table_fs): {inference_data_table_fs}")
+print(f"Raw Data Table for EDA(raw_data_table): {raw_data_table}")
 print(" ")
 print(f"Model Registry URI (model_registry_uri): {model_registry_uri}")
 print(f"Model Name Non Feature Store (registered_model_name_non_fs): {registered_model_name_non_fs}")
