@@ -40,7 +40,7 @@
 # MAGIC - **`SkinThickness`**:integer `-- Triceps skin fold thickness in mm`     
 # MAGIC - **`Insulin`**:integer `-- 2-Hour serum insulin in mu U/ml`     
 # MAGIC - **`BMI`**:double `-- Body mass index measured as weight in kg/(height in m)^2`     
-# MAGIC - **`DiabetesPedigreeFunction`**:double `-- A diabetes onset likelihood {associated with subject’s age, their diabetic family history, and other factors}`     
+# MAGIC - **`DiabetesPedigreeFunction`**:double `-- A diabetes onset likelihood {associated with subject’s age and their diabetic family history}`     
 # MAGIC - **`Outcome`**:integer `-- Diabetes diagnosis`     
 # MAGIC
 # MAGIC We will additionally parse out **`State`** information from **`Address`** so we can visualize the distribution of data across the USA.
@@ -67,11 +67,6 @@
 
 # COMMAND ----------
 
-# DBTITLE 1,Data 
-# MAGIC %run ./init
-
-# COMMAND ----------
-
 # DBTITLE 1,Import Relevant Libraries 
 import pyspark.sql.functions as F
 import pyspark.sql.types as T
@@ -82,9 +77,18 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 
+# from pandas_profiling import ProfileReport
 from ydata_profiling import ProfileReport
 # from ydata_profiling.utils.cache import cache_file
 
+
+# COMMAND ----------
+
+# DBTITLE 1,Data in UC | to update to non-UC
+catalog = "main"
+database = "merck_ml_ws"
+
+diabetes_data_table = f"{catalog}.{database}.diabetes"
 
 # COMMAND ----------
 
@@ -119,7 +123,7 @@ def extract_stateNzip_fromAddress(sdf, getState=True, getZip=False):
 # COMMAND ----------
 
 # DBTITLE 1,Read in data | to update wrt non-UC
-pima_sdf0 = spark.table(raw_data_table)
+pima_sdf0 = spark.table(diabetes_data_table)
 
 pii_cols = ['FirstName', 'LastName','Email','Address']
 
@@ -196,7 +200,7 @@ display(pima_sdf2.select(*[F.sum((F.col(c)==0).cast('integer')).alias(f'{c}_coun
 
 # COMMAND ----------
 
-display(pima_sdf2.drop(*pii_cols))
+display(pima_sdf2)
 
 # COMMAND ----------
 
@@ -214,12 +218,6 @@ display(pima_sdf2.select(*['State']+cols2use))
 
 # COMMAND ----------
 
-# MAGIC %md 
-# MAGIC PySpark is especially great for preprocessing large datasets efficiently and you can easily convert these sparkDF to pandasDF.    
-# MAGIC Let's take a look at doing just that and work in a more familiar coding environment. 
-
-# COMMAND ----------
-
 # DBTITLE 1,Pandas DataFrame [pd]
 # MAGIC %md
 # MAGIC ###3. EDA with Pandas Profiling
@@ -232,32 +230,32 @@ pima_sdf2.toPandas().describe() #.describe(include='all')
 # COMMAND ----------
 
 # DBTITLE 1,EDA using Pandas Profiling | [raw]
-#EDA using Pandas Profiling
-Preport1 = ProfileReport(pima_sdf1.toPandas()[cols2use],
-                        title="Pima Indian Diabetes Dataset [Before Preprocessing]",
-                        # correlations={
-                        #               "pearson": {"calculate": True},
-                        #               "spearman": {"calculate": True},
-                        #               "kendall": {"calculate": True},
-                        #               "phi_k": {"calculate": True},
-                        #              },
-                        plot={
-                              'correlation':{
-                              'cmap': 'RdBu_r',
-                              'bad': '#000000'},
-                              'fontsize':6,
-                             },
+# #EDA using Pandas Profiling
+# Preport1 = ProfileReport(pima_sdf1.toPandas()[cols2use],
+#                         title="Pima Indian Diabetes Dataset [Before Preprocessing]",
+#                         # correlations={
+#                         #               "pearson": {"calculate": True},
+#                         #               "spearman": {"calculate": True},
+#                         #               "kendall": {"calculate": True},
+#                         #               "phi_k": {"calculate": True},
+#                         #              },
+#                         plot={
+#                               'correlation':{
+#                               'cmap': 'RdBu_r',
+#                               'bad': '#000000'},
+#                               'fontsize':6,
+#                              },
                         
-                        sort=None, html={'style':{'full_width':True}},
-                        # minimal=True
-                        )
+#                         sort=None, html={'style':{'full_width':True}},
+#                         # minimal=True
+#                         )
                      
-# Preport1.to_file(output_file= "pandas_profile_output_raw.html")
+# # Preport1.to_file(output_file= "pandas_profile_output_raw.html")
 
-Preport1.to_notebook_iframe()
+# Preport1.to_notebook_iframe()
 
-# from ydata_profiling.utils.cache import cache_file
-# Preport1.to_widgets()
+# # from ydata_profiling.utils.cache import cache_file
+# # Preport1.to_widgets()
 
 
 # COMMAND ----------
@@ -268,31 +266,35 @@ Preport1.to_notebook_iframe()
 # COMMAND ----------
 
 # DBTITLE 1,EDA using Pandas Profiling | [replaced 0]
-#EDA using Pandas Profiling
+# #EDA using Pandas Profiling
 
-Preport2 = ProfileReport(pima_sdf2.toPandas()[cols2use],
-                        title="Pima Indian Diabetes Dataset [+ Minimal Preprocessing]",
-                        correlations={
-                                      "pearson": {"calculate": True},
-                                      "spearman": {"calculate": True},
-                                      "kendall": {"calculate": True},
-                                      "phi_k": {"calculate": True},
-                                     },
-                        plot={
-                              'correlation':{
-                              'cmap': 'RdBu_r',
-                              'bad': '#000000'},
-                              'fontsize':6,
-                             },
-                        sort=None, html={'style':{'full_width':True}}
-                        )
+# Preport2 = ProfileReport(pima_sdf2.toPandas()[cols2use],
+#                         title="Pima Indian Diabetes Dataset [+ Minimal Preprocessing]",
+#                         correlations={
+#                                       "pearson": {"calculate": True},
+#                                       "spearman": {"calculate": True},
+#                                       "kendall": {"calculate": True},
+#                                       "phi_k": {"calculate": True},
+#                                      },
+#                         plot={
+#                               'correlation':{
+#                               'cmap': 'RdBu_r',
+#                               'bad': '#000000'},
+#                               'fontsize':6,
+#                              },
+#                         sort=None, html={'style':{'full_width':True}}
+#                         )
                      
-# Preport2.to_file(output_file= "pandas_profile_output_cleaner0.html")
+# # Preport2.to_file(output_file= "pandas_profile_output_cleaner0.html")
 
-Preport2.to_notebook_iframe()
+# Preport2.to_notebook_iframe()
 
-# from ydata_profiling.utils.cache import cache_file
-# Preport2.to_widgets()
+# # from ydata_profiling.utils.cache import cache_file
+# # Preport2.to_widgets()
+
+
+# COMMAND ----------
+
 
 
 # COMMAND ----------
@@ -338,7 +340,7 @@ for i,col in enumerate(set(pima_pd[cols2use].columns)-{"Outcome"}):
 
 fig.tight_layout()
 fig.subplots_adjust(top=0.88)
-fig.suptitle('                               Overview', y=0.925);
+fig.suptitle('                           Overview', y=0.925);
 
 # fig.text(0.04, 0.5, 'Variables', va='center', rotation='vertical', fontsize=16)
 
@@ -415,17 +417,7 @@ for i,col in enumerate(set(pima_pd[cols2use].columns)-{'Outcome'}):
 
 # COMMAND ----------
 
-# MAGIC %md 
-# MAGIC - General observation of overal median value differences in the variables for patients that were eventually diagnosed with diabetes compared to those who are not. 
-# MAGIC - [Outliers](https://www.itl.nist.gov/div898/handbook/prc/section1/prc16.htm) in each variables for each Outcome category; some more spread out relative to median and IQR, some beyond the Wiskers. 
-# MAGIC
-# MAGIC SMEs to decide if outliers to be in/excluded, and to rule out if the outlier(s) are   
-# MAGIC
-# MAGIC - A measurement error or data entry error, correct the error where possible. 
-# MAGIC - Not a part of the study population (i.e., unusual properties or conditions)?
-# MAGIC - A natural part of the population you are studying? 
-# MAGIC
-# MAGIC <!-- https://statisticsbyjim.com/basics/remove-outliers/ -->
+
 
 # COMMAND ----------
 
@@ -469,6 +461,10 @@ plt.title("Pearson's Correlation Matrix")
 
 # COMMAND ----------
 
+
+
+# COMMAND ----------
+
 # MAGIC %md
 # MAGIC ###5. Summary and Recommendations 
 # MAGIC
@@ -476,28 +472,20 @@ plt.title("Pearson's Correlation Matrix")
 # COMMAND ----------
 
 # MAGIC %md 
+# MAGIC [to-add/update]
+# MAGIC - Steps we did #####         
 # MAGIC
-# MAGIC **In this walk through, we demonstrated:** 
-# MAGIC >- How PySpark DataFrame can help us easily clean, process, and visualize data, which can be advantageous when working with large datasets. 
-# MAGIC >- The ease of converting from PySpark DF to Pandas DF (and vice versa) 
-# MAGIC >- Ease of profiling data in both in PySpark and Pandas
-# MAGIC >- Access to familiar Pandas DF plotting/visualization libraries  e.g seaborn, matplolib etc. to help visualize data distributions, interactions, and outliers.   
-# MAGIC  
-# MAGIC >- The benefits of SparkDF (*large datasets, speed*) together with the ease and familiarity of practitioners using Pandas DF can also now be leveraged using the [Pandas API on Spark](https://docs.databricks.com/en/pandas/pandas-on-spark.html), which fills the gap of Pandas's big data scaling capabilities by providing `Pandas  equivalent APIs` that work on `Apache Spark`.    
-# MAGIC
-# MAGIC **In our EDA, we noted the following and their associated handling decision requirements :**      
-# MAGIC >- `Missing values` --  Impute decision/strategy e.g. `Mean, Median, KNN`?   
-# MAGIC >- `Data skewness` -- Scaling/Transformation e.g. do we sacle/normalize/log-transform ? 
-# MAGIC >- `Outliers` -- Include/Exclude basis?   
-# MAGIC
-# MAGIC
-# MAGIC **A residual and important question lingers: How do we go about tracking these decision steps for reproducibility?**    
-# MAGIC --> MLflow 
+# MAGIC -- Benefits of SparkDF (large Datasets)   
+# MAGIC -- Ease of using Pandas DF (familiarity)  
+# MAGIC -- [Pandas API on Spark](https://docs.databricks.com/en/pandas/pandas-on-spark.html): fills the gap of pandas's big data scaling challenge by providing pandas equivalent APIs that work on Apache Spark. 
+# MAGIC - Missing Values -- impute decision/strategy  
+# MAGIC - Skewness of data -- do we normalize/log-transform them? 
+# MAGIC - Q: How do we go about tracking these steps? --> MLflow 
 
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC #### 5# Quick example of using `sklearn.pipelines` to transform/process `"missing"` data we noted earlier
+# MAGIC #### 5# Quick example of using sklearn.pipelines to transform/process "missing" data we noted earlier
 
 # COMMAND ----------
 
@@ -571,10 +559,7 @@ pd.DataFrame(pima_sdf0_pdT, columns=nonZeroCols).head(15)
 # MAGIC - We can run an AutoML with the minimally processed pandas_df 
 # MAGIC - Look into Feature Engineering, Hyperparameter Tuning ---> Data Modeling
 # MAGIC
-# MAGIC **automl** 
-# MAGIC - ref: https://docs.databricks.com/en/machine-learning/automl/how-automl-works.html
-# MAGIC - api ref : https://docs.databricks.com/en/machine-learning/automl/train-ml-model-automl-api.html 
-# MAGIC
+# MAGIC **automl** api ref : https://docs.databricks.com/en/machine-learning/automl/train-ml-model-automl-api.html 
 
 # COMMAND ----------
 

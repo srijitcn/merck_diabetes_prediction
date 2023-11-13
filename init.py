@@ -11,7 +11,7 @@
 # COMMAND ----------
 
 user_email = dbutils.notebook.entry_point.getDbutils().notebook().getContext().userName().get()
-user_name = user_email.split('@')[0]
+user_name = user_email.split('@')[0].replace('.','_')
 user_prefix = f"{user_name[0:4]}{str(len(user_name)).rjust(3, '0')}"
 
 # COMMAND ----------

@@ -67,6 +67,11 @@
 
 # COMMAND ----------
 
+# DBTITLE 1,Data 
+# MAGIC %run ./init
+
+# COMMAND ----------
+
 # DBTITLE 1,Import Relevant Libraries 
 import pyspark.sql.functions as F
 import pyspark.sql.types as T
@@ -83,15 +88,7 @@ from ydata_profiling import ProfileReport
 
 # COMMAND ----------
 
-# DBTITLE 1,Data in UC | to update to non-UC
-catalog = "main"
-database = "merck_ml_ws"
-
-diabetes_data_table = f"{catalog}.{database}.diabetes"
-
-# COMMAND ----------
-
-# DBTITLE 1,PySpark DataFrames [sdf]
+# DBTITLE 0,PySpark DataFrames [sdf]
 # MAGIC %md
 # MAGIC ###1. Read in Data as a PySpark DataFrame  
 
@@ -121,8 +118,12 @@ def extract_stateNzip_fromAddress(sdf, getState=True, getZip=False):
 
 # COMMAND ----------
 
-# DBTITLE 1,Read in data | to update wrt non-UC
-pima_sdf0 = spark.table(diabetes_data_table)
+pima_sdf0 = spark.table(raw_data_table)
+
+# COMMAND ----------
+
+# DBTITLE 1,Read data 
+pima_sdf0 = spark.table(raw_data_table)
 
 pii_cols = ['FirstName', 'LastName','Email','Address']
 
@@ -203,15 +204,6 @@ display(pima_sdf2.drop(*pii_cols))
 
 # COMMAND ----------
 
-# DBTITLE 1,Save this 'slightly processed' data to UC | to update for non-UC
-# table2save = "diabetes_zero2null"
-
-# spark.sql(f"DROP TABLE IF EXISTS `{catalog}`.`{database}`.`{table2save}`;")
-
-# pima_sdf2.write.option("overwrite","true").saveAsTable(f"{catalog}.{database}.{table2save}")
-
-# COMMAND ----------
-
 # DBTITLE 1,Example data distributions with notebook viz 
 display(pima_sdf2.select(*['State']+cols2use))
 
@@ -223,7 +215,7 @@ display(pima_sdf2.select(*['State']+cols2use))
 
 # COMMAND ----------
 
-# DBTITLE 1,Pandas DataFrame [pd]
+# DBTITLE 0,Pandas DataFrame [pd]
 # MAGIC %md
 # MAGIC ###3. EDA with Pandas Profiling
 # MAGIC
@@ -234,16 +226,11 @@ pima_sdf2.toPandas().describe() #.describe(include='all')
 
 # COMMAND ----------
 
-# DBTITLE 1,EDA using Pandas Profiling | [raw]
+# DBTITLE 0,EDA using Pandas Profiling | [raw]
 #EDA using Pandas Profiling
 Preport1 = ProfileReport(pima_sdf1.toPandas()[cols2use],
                         title="Pima Indian Diabetes Dataset [Before Preprocessing]",
-                        # correlations={
-                        #               "pearson": {"calculate": True},
-                        #               "spearman": {"calculate": True},
-                        #               "kendall": {"calculate": True},
-                        #               "phi_k": {"calculate": True},
-                        #              },
+                        
                         plot={
                               'correlation':{
                               'cmap': 'RdBu_r',
@@ -255,8 +242,6 @@ Preport1 = ProfileReport(pima_sdf1.toPandas()[cols2use],
                         # minimal=True
                         )
                      
-# Preport1.to_file(output_file= "pandas_profile_output_raw.html")
-
 Preport1.to_notebook_iframe()
 
 # from ydata_profiling.utils.cache import cache_file
@@ -270,7 +255,7 @@ Preport1.to_notebook_iframe()
 
 # COMMAND ----------
 
-# DBTITLE 1,EDA using Pandas Profiling | [replaced 0]
+# DBTITLE 0,EDA using Pandas Profiling | [replaced 0]
 #EDA using Pandas Profiling
 
 Preport2 = ProfileReport(pima_sdf2.toPandas()[cols2use],
@@ -290,16 +275,10 @@ Preport2 = ProfileReport(pima_sdf2.toPandas()[cols2use],
                         sort=None, html={'style':{'full_width':True}}
                         )
                      
-# Preport2.to_file(output_file= "pandas_profile_output_cleaner0.html")
-
 Preport2.to_notebook_iframe()
 
 # from ydata_profiling.utils.cache import cache_file
 # Preport2.to_widgets()
-
-
-# COMMAND ----------
-
 
 
 # COMMAND ----------
@@ -310,23 +289,8 @@ Preport2.to_notebook_iframe()
 
 # COMMAND ----------
 
-## specify plt stye for colorblind friendliness 
-plt.style.use('seaborn-colorblind')
-
-# COMMAND ----------
-
-# available styes e.g. 
-plt.style.available
-
-# COMMAND ----------
-
 # DBTITLE 1,Make pandasDF from sparkDF
 pima_pd = pima_sdf2.toPandas() 
-
-# COMMAND ----------
-
-# DBTITLE 1,Specify columns of interest | "id" -- is for UC 
-# cols2use = ['Age', 'Pregnancies', 'Glucose', 'BloodPressure','SkinThickness', 'Insulin', 'BMI', 'DiabetesPedigreeFunction','Outcome']
 
 # COMMAND ----------
 
@@ -451,7 +415,6 @@ sns.set_theme(style="white")
 
 # Compute the correlation matrix
 corr = pima_pd[cols2use[:-1]].corr()
-#corr = pima_sdf0.toPandas()[cols2use[:-1]].corr()
 
 # Generate a mask for the upper triangle
 mask = np.triu(np.ones_like(corr, dtype=bool))
@@ -459,8 +422,6 @@ mask = np.triu(np.ones_like(corr, dtype=bool))
 # Set up the matplotlib figure
 f, ax = plt.subplots(figsize=(5, 5));
 
-# Generate a custom diverging colormap
-# cmap = sns.diverging_palette(230, 20, as_cmap=True)
 cmap = "RdBu_r"
 
 # Draw the heatmap with the mask and correct aspect ratio
@@ -473,10 +434,6 @@ sns.heatmap(corr,
            );
 
 plt.title("Pearson's Correlation Matrix")
-
-# COMMAND ----------
-
-
 
 # COMMAND ----------
 
@@ -508,7 +465,7 @@ plt.title("Pearson's Correlation Matrix")
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC #### 5# Quick example of using `sklearn.pipelines` to transform/process `"missing"` data we noted earlier
+# MAGIC #### 5(i) Quick example of using `sklearn.pipelines` to transform/process `"missing"` data we noted earlier
 
 # COMMAND ----------
 
@@ -562,12 +519,12 @@ pima_sdf0_pdT = preprocessor_fitT.transform(pima_sdf0_pd)
 
 # COMMAND ----------
 
-# DBTITLE 1,pima_sdf0_pd [Raw] 
+# DBTITLE 0,pima_sdf0_pd [Raw] 
 pima_sdf0_pd[nonZeroCols].head(15)
 
 # COMMAND ----------
 
-# DBTITLE 1,pima_sdf0__pdTransformed
+# DBTITLE 0,pima_sdf0__pdTransformed
 pd.DataFrame(pima_sdf0_pdT, columns=nonZeroCols).head(15)
 
 # COMMAND ----------
@@ -580,7 +537,7 @@ pd.DataFrame(pima_sdf0_pdT, columns=nonZeroCols).head(15)
 # MAGIC %md
 # MAGIC #### NEXT STEPs: 
 # MAGIC - We can run an AutoML with the minimally processed pandas_df 
-# MAGIC - Look into Feature Engineering, Hyperparameter Tuning ---> Data Modeling
+# MAGIC - Look into Feature Engineering, Hyperparameter Tuning, Data Modeling etc.
 # MAGIC
 # MAGIC **automl** 
 # MAGIC - ref: https://docs.databricks.com/en/machine-learning/automl/how-automl-works.html
@@ -594,8 +551,7 @@ pd.DataFrame(pima_sdf0_pdT, columns=nonZeroCols).head(15)
  
 # summary = databricks.automl.classify(pima_pd[cols2use], 
 #                                      target_col="Outcome",                                     
-#                                      timeout_minutes=10, 
-#                                      #primary_metric='roc_auc", #"precision", # default=f1
+#                                      timeout_minutes=6, 
 #                                     )
                                     
 
