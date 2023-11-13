@@ -68,16 +68,7 @@
 # COMMAND ----------
 
 # DBTITLE 1,Data 
-# catalog = "main"
-# database = "merck_ml_ws"
-# diabetes_data_table = f"{catalog}.{database}.diabetes"
-
-# data_file_name = "s3://databricks-e2demofieldengwest/external_location_srijit_nair/merck/diabetes.csv"
-
-# COMMAND ----------
-
-# DBTITLE 1,Run 01-Data Ingestion 
-# MAGIC %run "./01-Data Ingestion"
+# MAGIC %run ./init
 
 # COMMAND ----------
 
@@ -128,8 +119,7 @@ def extract_stateNzip_fromAddress(sdf, getState=True, getZip=False):
 # COMMAND ----------
 
 # DBTITLE 1,Read in data | to update wrt non-UC
-# pima_sdf0 = spark.table(diabetes_data_table)
-pima_sdf0 = df ## from "./01-Data Ingestion" notebook
+pima_sdf0 = spark.table(raw_data_table)
 
 pii_cols = ['FirstName', 'LastName','Email','Address']
 
@@ -307,10 +297,6 @@ Preport2.to_notebook_iframe()
 
 # COMMAND ----------
 
-
-
-# COMMAND ----------
-
 # MAGIC %md
 # MAGIC ###4. Further exploratory analyses with Pandas DataFrame
 # MAGIC
@@ -480,10 +466,6 @@ sns.heatmap(corr,
            );
 
 plt.title("Pearson's Correlation Matrix")
-
-# COMMAND ----------
-
-
 
 # COMMAND ----------
 

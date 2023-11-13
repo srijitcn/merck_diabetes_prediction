@@ -193,12 +193,21 @@ lab_result_columns = ["Id","Glucose","SkinThickness","Insulin", "DiabetesPedigre
 
 # COMMAND ----------
 
-df.select(demographic_columns).write.option("overwrite","true").saveAsTable(demographic_table)
+#only for EDA
+df.write.mode('overwrite').saveAsTable(raw_data_table)
 
 # COMMAND ----------
 
-df.select(lab_result_columns).write.option("overwrite","true").saveAsTable(lab_results_table)
+df.select(demographic_columns).write.mode('overwrite').saveAsTable(demographic_table)
 
 # COMMAND ----------
 
-df.select(physicals_columns).write.option("overwrite","true").saveAsTable(physicals_results_table)
+df.select(lab_result_columns).write.mode('overwrite').saveAsTable(lab_results_table)
+
+# COMMAND ----------
+
+df.select(physicals_columns).write.mode('overwrite').saveAsTable(physicals_results_table)
+
+# COMMAND ----------
+
+
