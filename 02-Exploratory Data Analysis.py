@@ -507,6 +507,15 @@ nonZeroCols
 
 # COMMAND ----------
 
+#setup MLflow experiment so that it does not create experiment in default path
+from datetime import datetime
+mlflow.set_registry_uri(model_registry_uri)
+experiment_tag = f"{user_prefix}_exploratory_data_analysis_{datetime.now().strftime('%d-%m-%Y')}"
+experiment_base_path = f"Users/{user_email}/mlflow_experiments"
+dbutils.fs.mkdirs(f"file:/Workspace/{experiment_base_path}")
+experiment_path = f"/{experiment_base_path}/{experiment_tag}"
+experiment = mlflow.set_experiment(experiment_path)
+
 ## we will convert original SparkDF to Pandas to illustrate: 
 pima_sdf0_pd = pima_sdf0.select(cols2use).toPandas()
 

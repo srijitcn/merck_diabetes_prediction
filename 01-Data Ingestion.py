@@ -47,6 +47,7 @@
 
 # COMMAND ----------
 
+#dbutils - Databricks Utilities documentation https://docs.databricks.com/en/dev-tools/databricks-utils.html
 dbutils.library.restartPython()
 
 # COMMAND ----------

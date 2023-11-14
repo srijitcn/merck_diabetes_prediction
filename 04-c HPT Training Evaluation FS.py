@@ -216,14 +216,16 @@ import numpy as np
 
 mlflow.set_registry_uri(model_registry_uri)
 
+#Databricks Utilities (dbutils): https://docs.databricks.com/en/dev-tools/databricks-utils.html
 user_name = dbutils.notebook.entry_point.getDbutils().notebook().getContext().userName().get()
 db_host = dbutils.notebook.entry_point.getDbutils().notebook().getContext().apiUrl().get()
 db_token = dbutils.notebook.entry_point.getDbutils().notebook().getContext().apiToken().get()
 
 #Create an MLFlow experiment
-experiment_tag = f"diabetes_prediction_fs_{datetime.now().strftime('%d-%m-%Y')}"
-experiment_path = f"/Users/{user_email}/mlflow_experiments/{experiment_tag}"
-dbutils.fs.mkdirs(experiment_path)
+experiment_tag = f"{user_prefix}_diabetes_prediction_fs_{datetime.now().strftime('%d-%m-%Y')}"
+experiment_base_path = f"Users/{user_email}/mlflow_experiments"
+dbutils.fs.mkdirs(f"file:/Workspace/{experiment_base_path}")
+experiment_path = f"/{experiment_base_path}/{experiment_tag}"
 
 # Manually create the experiment so that you can get the ID and can send it to the worker nodes for scaling
 experiment = mlflow.set_experiment(experiment_path)
@@ -293,7 +295,7 @@ fmin(
   fn=loss_fn,
   space=search_space,
   algo=algo,
-  max_evals=10,
+  max_evals=5,
   trials=trials)
 
 

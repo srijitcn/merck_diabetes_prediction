@@ -28,7 +28,6 @@
 # COMMAND ----------
 
 input_data_file = f"{s3_path}/Postural_Tremor_DA_Raw.csv"
-user_name = dbutils.notebook.entry_point.getDbutils().notebook().getContext().userName().get().split('@')[0]
 
 # COMMAND ----------
 
@@ -159,7 +158,8 @@ if 'converter_train' in globals():
   
 if 'converter_test' in globals():
   converter_test.delete()
-  
+
+#Databricks Utilities (dbutils): https://docs.databricks.com/en/dev-tools/databricks-utils.html
 path_to_cache = f"file:///dbfs/workshop/temp/cache/{user_name}/lstm/parkinsons/petastorm_cache"
 dbutils.fs.rm(path_to_cache, recurse=True)
 dbutils.fs.mkdirs(path_to_cache)
@@ -263,6 +263,7 @@ if 'converter_train' in globals():
 if 'converter_test' in globals():
   converter_test.delete()
   
+#Databricks Utilities (dbutils): https://docs.databricks.com/en/dev-tools/databricks-utils.html
 path_to_cache = f"file:///dbfs/workshop/temp/cache/{user_name}/lstm/parkinsons/petastorm_cache_dist"
 dbutils.fs.rm(path_to_cache, recurse=True)
 dbutils.fs.mkdirs(path_to_cache)
@@ -299,14 +300,16 @@ batch_size = 100
 initial_lr = 0.1
 num_epoch = 1
 
+#Databricks Utilities (dbutils): https://docs.databricks.com/en/dev-tools/databricks-utils.html
 user_name = dbutils.notebook.entry_point.getDbutils().notebook().getContext().userName().get()
 db_host = dbutils.notebook.entry_point.getDbutils().notebook().getContext().apiUrl().get()
 db_token = dbutils.notebook.entry_point.getDbutils().notebook().getContext().apiToken().get()
 
 #Create an MLFlow experiment
-experiment_tag = f"parkinsons_prediction_{datetime.now().strftime('%d-%m-%Y')}"
-experiment_path = f"/Users/{user_email}/mlflow_experiments/{experiment_tag}"
-dbutils.fs.mkdirs(experiment_path)
+experiment_tag = f"{user_prefix}_parkinsons_prediction_{datetime.now().strftime('%d-%m-%Y')}"
+experiment_base_path = f"Users/{user_email}/mlflow_experiments"
+dbutils.fs.mkdirs(f"file:/Workspace/{experiment_base_path}")
+experiment_path = f"/{experiment_base_path}/{experiment_tag}"
 
 # Manually create the experiment so that you can get the ID and can send it to the worker nodes for scaling
 experiment = mlflow.set_experiment(experiment_path)
