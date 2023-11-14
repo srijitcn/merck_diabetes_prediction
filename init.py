@@ -16,6 +16,12 @@ user_prefix = f"{user_name[0:4]}{str(len(user_name)).rjust(3, '0')}"
 
 # COMMAND ----------
 
+## CHANGE ME
+s3_path = "s3://databricks-e2demofieldengwest/external_location_srijit_nair/merck"
+workspace_resource_path = f"file:///Workspace/Repos/{user_email}/merck_diabetes_prediction/_resources"
+
+# COMMAND ----------
+
 import requests
 db_host = spark.conf.get('spark.databricks.workspaceUrl')
 db_token = dbutils.notebook.entry_point.getDbutils().notebook().getContext().apiToken().getOrElse(None)

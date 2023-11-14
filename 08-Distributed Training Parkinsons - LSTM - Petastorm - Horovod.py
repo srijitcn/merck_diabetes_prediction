@@ -23,7 +23,11 @@
 
 # COMMAND ----------
 
-input_data_file = "s3://databricks-e2demofieldengwest/external_location_srijit_nair/merck/Postural_Tremor_DA_Raw.csv"
+# MAGIC %run ./init
+
+# COMMAND ----------
+
+input_data_file = f"{s3_path}/Postural_Tremor_DA_Raw.csv"
 user_name = dbutils.notebook.entry_point.getDbutils().notebook().getContext().userName().get().split('@')[0]
 
 # COMMAND ----------
@@ -301,8 +305,9 @@ db_token = dbutils.notebook.entry_point.getDbutils().notebook().getContext().api
 
 #Create an MLFlow experiment
 experiment_tag = f"parkinsons_prediction_{datetime.now().strftime('%d-%m-%Y')}"
-experiment_path = f"/Users/{user_name}/mlflow_experiments/{experiment_tag}"
- 
+experiment_path = f"/Users/{user_email}/mlflow_experiments/{experiment_tag}"
+dbutils.fs.mkdirs(experiment_path)
+
 # Manually create the experiment so that you can get the ID and can send it to the worker nodes for scaling
 experiment = mlflow.set_experiment(experiment_path)
    

@@ -74,23 +74,16 @@ spark.sql(f"DROP TABLE IF EXISTS {inference_data_table_fs}")
 
 # COMMAND ----------
 
-# MAGIC %cd
-
-# COMMAND ----------
-
-src_folder = f"file:///Workspace/Users/{user_email}/merck_diabetes_prediction/_resources"
+src_folder = workspace_resource_path
 tgt_folder = "/FileStore/tmp/merck_diabetes_prediction"
 
+dbutils.fs.rm(tgt_folder,True)
 dbutils.fs.mkdirs(tgt_folder)
 dbutils.fs.cp(src_folder,tgt_folder, True)
 
 # COMMAND ----------
 
 dbutils.fs.ls(tgt_folder)
-
-# COMMAND ----------
-
-
 
 # COMMAND ----------
 

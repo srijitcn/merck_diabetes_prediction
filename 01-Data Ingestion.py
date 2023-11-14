@@ -60,7 +60,7 @@ dbutils.library.restartPython()
 
 # COMMAND ----------
 
-data_file_name = "s3://databricks-e2demofieldengwest/external_location_srijit_nair/merck/diabetes.csv"
+data_file_name = f"{s3_path}/diabetes.csv"
 
 # COMMAND ----------
 

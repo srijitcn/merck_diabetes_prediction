@@ -29,6 +29,13 @@
 
 # COMMAND ----------
 
+# MAGIC %md
+# MAGIC #### Developer Workflow
+# MAGIC
+# MAGIC <img src="files/tmp/merck_diabetes_prediction/devworkflow.png">
+
+# COMMAND ----------
+
 # MAGIC %md 
 # MAGIC #### MLOps on Databricks
 # MAGIC
