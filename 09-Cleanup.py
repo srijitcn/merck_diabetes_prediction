@@ -100,10 +100,11 @@ if not uc_enabled:
 # COMMAND ----------
 
 if uc_enabled:
-  models = mlflow_client.search_registered_models(filter_string=f"name ILIKE '%{user_prefix}_%'")
+  models = mlflow_client.search_registered_models()
   for model in models:    
-    print(f"Deleting model {model.name}")
-    mlflow_client.delete_registered_model(name=model.name) 
+    if model.name.startswith(f"{catalog}.{database}"):
+      print(f"Deleting model {model.name}")
+      mlflow_client.delete_registered_model(name=model.name) 
 
 # COMMAND ----------
 
@@ -122,3 +123,7 @@ for experiment in experiments:
 
 experiment_base_path = f"Users/{user_email}/mlflow_experiments"
 dbutils.fs.rm(f"file:/Workspace/{experiment_base_path}",True)
+
+# COMMAND ----------
+
+
