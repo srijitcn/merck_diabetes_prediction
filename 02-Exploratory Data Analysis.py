@@ -101,7 +101,7 @@ def extract_stateNzip_fromAddress(sdf, getState=True, getZip=False):
   Extract State and Zip from Address 
   location can be helpful for deriving a birds-eye-view of how the variables are distributed across the USA
   """
-  sdf_out = (sdf.withColumn('_split', F.split('Address',','))            
+  sdf_out = (sdf           
              .withColumn('_split', F.split('Address',' '))            
              .withColumn('len_split1', F.array_size('_split') )
              .withColumn('State', F.col('_split')[F.col('len_split1')-2])
