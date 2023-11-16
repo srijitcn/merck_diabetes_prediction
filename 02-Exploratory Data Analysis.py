@@ -106,7 +106,7 @@ def extract_stateNzip_fromAddress(sdf, getState=True, getZip=False):
              .withColumn('len_split1', F.array_size('_split') )
              .withColumn('State', F.col('_split')[F.col('len_split1')-2])
              .withColumn('Zip', F.col('_split')[F.col('len_split1')-1])                         
-             .drop(*['_split','state_zip','_split2','len_split1'])
+             .drop(*['_split','state_zip','len_split1'])
             )
   if getZip:
     return sdf_out.drop('State')
@@ -118,7 +118,7 @@ def extract_stateNzip_fromAddress(sdf, getState=True, getZip=False):
 
 # COMMAND ----------
 
-pima_sdf0 = spark.table(raw_data_table)
+raw_data_table 
 
 # COMMAND ----------
 
