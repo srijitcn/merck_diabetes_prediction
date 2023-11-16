@@ -36,7 +36,15 @@ except:
 
 # COMMAND ----------
 
-spark.sql(f"DROP DATABASE IF EXISTS {database} CASCADE")
+#spark.sql(f"DROP DATABASE IF EXISTS {database} CASCADE")
+
+spark.sql(f"DROP TABLE IF EXISTS {demographic_table}")
+spark.sql(f"DROP TABLE IF EXISTS {lab_results_table}")
+spark.sql(f"DROP TABLE IF EXISTS {physicals_results_table}")
+spark.sql(f"DROP TABLE IF EXISTS {feature_table_name}")
+spark.sql(f"DROP TABLE IF EXISTS {inference_data_table_nonfs}")
+spark.sql(f"DROP TABLE IF EXISTS {inference_data_table_fs}")
+spark.sql(f"DROP TABLE IF EXISTS {raw_data_table}")
 
 # COMMAND ----------
 

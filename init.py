@@ -36,9 +36,9 @@ uc_enabled = False if response["data_security_mode"]=="NONE" else True
 catalog = "main"
 database = "merck_ml_ws"
 
-demographic_table = f"{database}.patient_demographics"
-lab_results_table = f"{database}.patient_lab_results"
-physicals_results_table = f"{database}.patient_pysicals"
+demographic_table = f"{database}.patient_demographics_{user_prefix}"
+lab_results_table = f"{database}.patient_lab_results_{user_prefix}"
+physicals_results_table = f"{database}.patient_pysicals_{user_prefix}"
 feature_table_name = f"{database}.diabetes_features_{user_prefix}"
 inference_data_table_nonfs = f"{database}.patient_data_nonfs_{user_prefix}"
 inference_data_table_fs = f"{database}.patient_data_fs_{user_prefix}"
